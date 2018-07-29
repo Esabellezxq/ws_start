@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" name="" id="user" value="">
+    <input type="text" name="" id="room" value="">
+    <button id="login">login</button>
+    <ul id="list">
+        
+    </ul>
+    <input type="text" name="" id="input" value="">
+    <button id="contentBtn" disabled="disabled">send</button>
+</body>
+<script>
+    document.onload = function(){
+        let ws = new WebSocket("ws://localhost:4500");
+        let user = document.getElementById('user').value;
+        let room = document.getElementById('room').value;
+        document.getElementById("login").onclick = function(){
+            let msg = {
+                type: "login",
+                data: {
+                    user: user,
+                    room: room
+                }
+            }
+            ws.onopen = function(){
+                console.log(con);
+                ws.send(JSON.stringify(msg));
+                ws.onmessage = function(msg){
+                    console.log(msg);
+                    let message = JSON.parse(msg);
+                    if(message.resType === "logState")
+                    {
+                        if(message.data.state === 1){
+                            document.getElementById("contentBtn").disabled = false;
+                        }
+                    } 
+                }
+            }
+        };
+        document.getElementById("btn").onclick = function(){
+            let content = document.getElementById("input").value;
+            let msg = {
+                type: "chatContent",
+                data: {
+                    user: user,
+                    room: room,
+                    content: content
+                }
+            }
+            ws.onopen = function(){
+                ws.send(JSON.stringify(msg));
+                ws.onmessage = function(msg){
+                    console.log(msg);
+                    let message = JSON.parse(msg);
+                    if(message.resType === "chatMsg")
+                    {
+                        let msgNode = document.createElement("li");
+                        msgNode.innerHTML = message.data.content;
+                        document.getElementById("list").appendChild(msgNode);
+                    } 
+                }
+            }
+        }
+    }
+</script>
+</html>
