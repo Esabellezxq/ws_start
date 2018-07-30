@@ -10,7 +10,13 @@ function checkUserLog(){
 
 }
 function broadcast(){
-
+    wss.broadcast = function broadcast(data) {
+        wss.clients.forEach(function each(client) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(data);
+          }
+        });
+    };
 }
 wss.on('connection',function connection(ws){
     ws.on('message',function incoming(message){
@@ -31,5 +37,5 @@ wss.on('connection',function connection(ws){
                 checkUserLog(msg.data.user);
                 broadcast(msg.data);
         }
-    };
+    });
 })
