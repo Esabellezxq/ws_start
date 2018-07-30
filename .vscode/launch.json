@@ -4,11 +4,12 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "type": "chrome",
             "request": "launch",
             "name": "启动 Chrome 并打开 localhost",
-            "file":"${workspaceFolder}/client.html",
+            "file":"${workspaceFolder}/simple.html",
             "webRoot": "${workspaceFolder}"
         }
     ]
