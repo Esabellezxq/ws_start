@@ -29,7 +29,6 @@ function createRoom(wsCon,user){
 
 //加入已有房间
 function enterRoom(wsCon, room , user){
-    userRoom[room] = [] ;
     userRoom[room].push({
         con: wsCon,
         user: user
@@ -54,17 +53,18 @@ wss.on('connection', function connection(ws) {
                 ws.send(JSON.stringify(createRes));
                 break;
             case 'enterReq':
-                enterRoom(ws,req.room,req.user).forEach(function each(client) {
+                enterRoom(ws,req.room,req.user);
+                // console.log(userRoom[req.room]);
+                userRoom[req.room].forEach(function each(client) {
                     let enterRes = {
                         type: 'enterRes',
-                        data: `${client.user} 进入房间`
+                        data: `${req.user} 进入房间`
                     }
                     if (client.con.readyState === WebSocket.OPEN) {
                         client.con.send(JSON.stringify(enterRes));
                         console.log(`${client.user} sent`);
                     }
                 });
-                
         };
              
             // case 'chat':
