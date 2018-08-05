@@ -8,43 +8,62 @@
 </head>
 <body>
     <input type="text" id="user" value="">
+    <br>
+    <button id="createRoom">创建房间</button>
+    <br>
     <input type="text" id="room" value="">
-    <button id="btn">连接</button>
-
+    <button id="enterRoom">进入房间</button>
+    <br>
     <input type="text" id="content" value="">
-    <button id="send" disabled="disabled">发送</button>
+    <button id="sendBtn" disabled="disabled">发送</button>
 
     <ul id="msgList">
         
     </ul>
 </body>
 <script>
-    let socket = new WebSocket("ws://127.0.0.1:3000");
-    document.getElementById("btn").onclick = function(){
-        let user = document.getElementById('user').value;
-        let room = document.getElementById('room').value;
-        let loginMsg = {
-            type: 'login',
-            data: {
-                'user': user,
-                'room': room
-            }
-        };
-        socket.onopen = function(event){
-            socket.send(JSON.stringify(loginMsg));
+    window.onload = function(){
+        let socket = new WebSocket("ws://127.0.0.1:3000");
+        // 创建房间
+        document.getElementById("createRoom").onclick = function(){
+            let user = document.getElementById('user').value;
+            let createMsg = {
+                type: 'createReq',
+                data: {
+                    'user': user,
+                }
+            };
+            socket.send(JSON.stringify(createMsg));
             socket.onmessage = function(msg){
                 let res = JSON.parse(msg.data);
-                if(res.type === 'loginRes'){
-                    if(res.data === 'success'){
-                        console.log('连接成功');
-                        document.getElementById('sendBtn').disabled = false;
-                    }
+                if(res.type === 'createRes'){
+                    console.log(res.data);
                 }
+            }
+        };
+        // 进入房间
+        document.getElementById("enterRoom").onclick = function(){
+            let user = document.getElementById('user').value;
+            let room = document.getElementById('room').value;
+            let enterMsg = {
+                type: 'enterReq',
+                data: {
+                    'user': user,
+                    'room': room
+                }
+            };
+            socket.send(JSON.stringify(enterMsg));
+    };
+        socket.onmessage = function(msg){
+            let res = JSON.parse(msg.data);
+            if(res.type === 'enterRes'){
+                console.log(res.data);
             }
         }
     }
-    document.getElementById('sendBtn').onclick = function(){
 
-    }
+    // document.getElementById('sendBtn').onclick = function(){
+
+
 </script>
 </html>
