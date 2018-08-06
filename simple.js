@@ -8,22 +8,21 @@ var userRoom = {};
 //群主创建新房间并加入
 function createRoom(wsCon,user){
     let id = UUID.v1();
-    userRoom[id] = [];
-    userRoom[id].push({
-        con: wsCon,
-        user: user
-    });
-    // console.log(userRoom);
-    let data = {
-        roomId: id,
+    if(id){
+        userRoom[id] = [];
+        userRoom[id].push({
+            con: wsCon,
+            user: user
+        });
     }
+    // console.log(userRoom);
     var status = false;
-    if(data){
+    if(id){
         status = true;
     }
     return { 
         status: status,
-        data: data
+        roomId: id
     };
 }
 
@@ -41,7 +40,6 @@ function enterRoom(wsCon, room , user){
 // function reEnter(){}
 wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {
-        // console.log('received: %s', message);
         let clientMsg = JSON.parse(message);
         let req = clientMsg.data;
         switch(clientMsg.type){
@@ -54,7 +52,6 @@ wss.on('connection', function connection(ws) {
                 break;
             case 'enterReq':
                 enterRoom(ws,req.room,req.user);
-                // console.log(userRoom[req.room]);
                 userRoom[req.room].forEach(function each(client) {
                     let enterRes = {
                         type: 'enterRes',
@@ -65,17 +62,15 @@ wss.on('connection', function connection(ws) {
                         console.log(`${client.user} sent`);
                     }
                 });
+                break;
+            case 'chatMsg':
+                if(req.room){
+                    userRoom[req.room].forEach(function each(client){
+                        if(client.con.readyState === WebSocket.OPEN){
+                            client.con.send(message);
+                        }
+                    });
+                }  
         };
-             
-            // case 'chat':
-            //     wss.clients.forEach(function each(client){
-            //         if(client.readyState === WebSocket.OPEN){
-            //             client.send(loginMsg.data);
-            //         }
-            //     });
-            //     break;
-        // }
-        // wss.broadcast(ws.user);
     });
-    // ws.send(ws + req.connection);
 });

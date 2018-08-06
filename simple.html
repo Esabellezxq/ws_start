@@ -7,6 +7,7 @@
     <title>Document</title>
 </head>
 <body>
+    <h4 id="roomNum"></h4>
     <input type="text" id="user" value="">
     <br>
     <button id="createRoom">创建房间</button>
@@ -15,7 +16,7 @@
     <button id="enterRoom">进入房间</button>
     <br>
     <input type="text" id="content" value="">
-    <button id="sendBtn" disabled="disabled">发送</button>
+    <button id="sendBtn">发送</button>
 
     <ul id="msgList">
         
@@ -26,7 +27,7 @@
         let socket = new WebSocket("ws://127.0.0.1:3000");
         // 创建房间
         document.getElementById("createRoom").onclick = function(){
-            let user = document.getElementById('user').value;
+            var user = document.getElementById('user').value;
             let createMsg = {
                 type: 'createReq',
                 data: {
@@ -34,17 +35,11 @@
                 }
             };
             socket.send(JSON.stringify(createMsg));
-            socket.onmessage = function(msg){
-                let res = JSON.parse(msg.data);
-                if(res.type === 'createRes'){
-                    console.log(res.data);
-                }
-            }
         };
         // 进入房间
         document.getElementById("enterRoom").onclick = function(){
-            let user = document.getElementById('user').value;
-            let room = document.getElementById('room').value;
+            var user = document.getElementById('user').value;
+            var room = document.getElementById('room').value;
             let enterMsg = {
                 type: 'enterReq',
                 data: {
@@ -53,17 +48,40 @@
                 }
             };
             socket.send(JSON.stringify(enterMsg));
-    };
+        };
+        document.getElementById("sendBtn").onclick = function(){
+            var user = document.getElementById('user').value;
+            var room = document.getElementById('room').value;
+            var chatCon = document.getElementById('content').value;
+            let chatMsg = {
+                type: 'chatMsg',
+                data: {
+                    'user': user,
+                    'room': room,
+                    'chatCon': chatCon
+                }
+            };
+            socket.send(JSON.stringify(chatMsg));
+        }
         socket.onmessage = function(msg){
             let res = JSON.parse(msg.data);
-            if(res.type === 'enterRes'){
-                console.log(res.data);
+            switch(res.type){
+                case 'createRes':
+                    document.getElementById("roomNum").innerHTML = res.data.roomId;
+                    var room = document.getElementById('room').value = res.data.roomId;
+                    console.log(res.data);
+                    break;
+                case 'enterRes': 
+                    console.log(res.data);
+                    break;
+                case 'chatMsg':
+                    let msgNode = document.createElement('li');
+                    msgNode.innerHTML = res.data.user + ":"+ res.data.chatCon;
+                    document.getElementById("msgList").appendChild(msgNode);
+                    break;
             }
         }
     }
-
-    // document.getElementById('sendBtn').onclick = function(){
-
 
 </script>
 </html>
